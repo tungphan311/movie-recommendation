@@ -21,6 +21,7 @@ def seed():
         for i in range(1, 611):
             email = randomEmail()
             u = User(id=i, email=email)
+            u.hash_password("123456")
             db.session.add(u)
 
     movies = Movie.query.all()
