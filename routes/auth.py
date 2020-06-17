@@ -2,7 +2,7 @@ from flask import request, make_response, jsonify
 from flask_jwt_extended import create_access_token
 from app import app, db
 from app.models import User
-from app.response import Response
+from app.response import Response, create_response
 import re
 import json
 
@@ -33,17 +33,19 @@ def auth_register():
             db.session.flush()
             db.session.commit()
 
-            identity = Token(u.id, u.email).to_json()
-            token = create_access_token(identity=identity)
+            token = create_token(u)
 
-            response = Response("201", "Tạo tài khoản thành công", data=token).to_json()
-            return  make_response(response, 201)
+            return create_response(201, "Tạo tài khoản thành công", data=token)
         else:
-            response = Response("400", "Email đã được đăng ký").to_json()
-            return make_response(response, 400)
+            return create_response(400, "Email đã được đăng ký")
     else:
-        response = Response("400", "Thông tin đăng ký không hợp lệ").to_json()
-        return make_response(response, 400)
+        return create_response(400, "Thông tin đăng ký không hợp lệ")
+
+
+def create_token(user):
+    identity = Token(user.id, user.email).to_json()
+    token = create_access_token(identity=identity)
+    return token
 
 
 def user_existed(email):
@@ -53,3 +55,21 @@ def user_existed(email):
         return False
     else:
         return True
+
+
+def auth_login():
+    data = request.get_json()
+    email = data.get("email", "")
+    password = data.get("password", "")
+
+    user = User.query.filter_by(email=email).first()
+
+    if user is None:
+        return create_response(401, "Thông tin đăng nhập không không tồn tại")
+    else:
+        if user.check_password(password):
+            token = create_token(user)
+
+            return create_response(200, "Đăng nhập thành công", data=token) 
+        else:
+            return create_response(401, "Thông tin đăng nhập không không tồn tại")
