@@ -1,6 +1,8 @@
 from app import app
+from flask import request
 from flask_cors import cross_origin
 from routes.auth import auth_register, auth_login
+from routes.recommendation import recommend
 
 
 @app.route('/')
@@ -21,7 +23,9 @@ def login():
     return auth_login()
 
 
-@app.route("/api/get-recommend")
+@app.route("/api/recommend")
 @cross_origin()
 def get_recommend():
-    return "rec"
+    data = request.get_json()
+    id = data.get("user_id", 0)
+    return recommend(id)

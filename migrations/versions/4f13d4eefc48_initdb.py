@@ -1,8 +1,8 @@
-"""users table
+"""'initDB'
 
-Revision ID: f9e157ad8255
+Revision ID: 4f13d4eefc48
 Revises: 
-Create Date: 2020-06-15 00:46:35.577619
+Create Date: 2020-06-18 00:04:32.984040
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'f9e157ad8255'
+revision = '4f13d4eefc48'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -34,7 +34,7 @@ def upgrade():
     )
     op.create_table('rating',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('rating', sa.Float(), nullable=True),
+    sa.Column('rating', sa.Integer(), nullable=True),
     sa.Column('timestamp', sa.DateTime(), nullable=True),
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('movie_id', sa.Integer(), nullable=False),

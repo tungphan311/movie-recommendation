@@ -31,9 +31,10 @@ def seed():
 
         for index, row in mv.iterrows(): 
             tmdb_id = links.loc[index, 'tmdbId']
-            m = Movie(id=row['movieId'], title=row['title'],
-                      genres=row['genres'], tmdb_id=tmdb_id)
-            db.session.add(m)
+            if row['movieId'] < 10181:
+                m = Movie(id=row['movieId'], title=row['title'],
+                        genres=row['genres'], tmdb_id=tmdb_id)
+                db.session.add(m)
 
     ratings = Rating.query.all()
     if len(ratings) == 0:
@@ -41,9 +42,12 @@ def seed():
         
         for index, row in rt.iterrows():
             time = datetime.datetime.utcfromtimestamp(1347517370)
-            r = Rating(rating=row['rating'], timestamp=time,
-                       user_id=row['userId'], movie_id=row['movieId'])
-            db.session.add(r)
+            rating = int(round(row['rating']))
+
+            if row['movieId'] < 10181:
+                r = Rating(rating=rating, timestamp=time,
+                        user_id=row['userId'], movie_id=row['movieId'])
+                db.session.add(r)
 
     db.session.commit()
 
