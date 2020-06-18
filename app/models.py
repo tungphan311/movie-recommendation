@@ -32,7 +32,7 @@ class Movie(db.Model):
     views = db.relationship('View', backref='movie_view', lazy='dynamic')
 
     def __repr__(self):
-        return '<Movie {}>'.format(self.body)
+        return '<Movie {}>'.format(self.ratings)
 
 
 class Rating(db.Model):
@@ -43,7 +43,7 @@ class Rating(db.Model):
     movie_id = db.Column(db.Integer, db.ForeignKey('movie.id'), nullable=False)
 
     def __repr__(self):
-        return '<Rating {}>'.format(self.body)
+        return '<Rating {}>'.format(self.rating)
 
 
 class Review(db.Model):
@@ -65,4 +65,4 @@ class View(db.Model):
     movie_id = db.Column(db.Integer, db.ForeignKey('movie.id'), nullable=False)
 
     def __repr__(self):
-        return '<View {}>'.format(self.body)
+        return '<View {}>'.format(self.user_id)
