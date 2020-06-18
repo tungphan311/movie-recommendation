@@ -8,6 +8,8 @@ class User(db.Model):
     email = db.Column(db.String(128), unique=True)
     password_hash = db.Column(db.String(128))
     ratings = db.relationship('Rating', backref='author', lazy='dynamic')
+    reviews = db.relationship('Review', backref='review', lazy='dynamic')
+    views = db.relationship('View', backref='view', lazy='dynamic')
 
     def __repr__(self):
         return '<User {}>'.format(self.username)
@@ -26,6 +28,8 @@ class Movie(db.Model):
     genres = db.Column(db.String(200))
     tmdb_id = db.Column(db.Integer)
     ratings = db.relationship('Rating', backref='movie', lazy='dynamic')
+    reviews = db.relationship('Review', backref='movie_review', lazy='dynamic')
+    views = db.relationship('View', backref='movie_view', lazy='dynamic')
 
     def __repr__(self):
         return '<Movie {}>'.format(self.body)
@@ -52,3 +56,13 @@ class Review(db.Model):
 
     def __repr__(self):
         return '<Review {}>'.format(self.body)
+
+
+class View(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    movie_id = db.Column(db.Integer, db.ForeignKey('movie.id'), nullable=False)
+
+    def __repr__(self):
+        return '<View {}>'.format(self.body)
