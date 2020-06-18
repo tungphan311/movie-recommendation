@@ -6,11 +6,12 @@ from app.response import Response, create_response
 import re
 import json
 
+
 class Token:
     def __init__(self, id, email):
         self.id = id
         self.email = email
-    
+
     def to_json(self):
         return json.dumps(self, default=lambda o: o.__dict__, ensure_ascii=False)
 
@@ -20,11 +21,11 @@ def auth_register():
     email = data.get("email", "")
     password = data.get("password", "")
     valid_email = re.search(
-        "^(([^<>()[\]\\.,;:\s@“]+(\.[^<>()[\]\\.,;:\s@“]+)*)|(“.+“))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$", 
+        "^(([^<>()[\]\\.,;:\s@“]+(\.[^<>()[\]\\.,;:\s@“]+)*)|(“.+“))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$",
         email
     )
     valid_password = len(password) >= 6 and len(password) <= 15
-    
+
     if valid_password and valid_email:
         if not user_existed(email):
             u = User(email=email)
@@ -35,11 +36,11 @@ def auth_register():
 
             token = create_token(u)
 
-            return create_response(201, "Tạo tài khoản thành công", data=token)
+            return create_response(201, "Create account successfully", data=token)
         else:
-            return create_response(400, "Email đã được đăng ký")
+            return create_response(400, "Email is already taken")
     else:
-        return create_response(400, "Thông tin đăng ký không hợp lệ")
+        return create_response(400, "Request info is not valid")
 
 
 def create_token(user):
@@ -65,11 +66,11 @@ def auth_login():
     user = User.query.filter_by(email=email).first()
 
     if user is None:
-        return create_response(401, "Thông tin đăng nhập không không tồn tại")
+        return create_response(401, "Email or password is not correct")
     else:
         if user.check_password(password):
             token = create_token(user)
 
-            return create_response(200, "Đăng nhập thành công", data=token) 
+            return create_response(200, "Login successfully", data=token)
         else:
-            return create_response(401, "Thông tin đăng nhập không không tồn tại")
+            return create_response(401, "Email or password is not correct")
