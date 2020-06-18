@@ -46,7 +46,28 @@ def get_movie_by_id(id, movieId):
 
     avatar = IMG_URL + res['poster_path'] if res['poster_path'] is not None else IMG_DEFAULT
     background = IMG_URL + res['backdrop_path'] if res['backdrop_path'] is not None else BACKDROP_DEFAULT
+    name = res['original_title']
+    score = res['vote_average']
+    limit = '18+' if res['adult'] == True else '13+'
+    length = formatMovieLength(res['runtime'])
+    genres = res['genres']
 
-    data = { "id": id, "movId": movieId, "avatar": avatar, "background": background }
+    data = { 
+        "id": id, 
+        "movId": movieId, 
+        "avatar": avatar, 
+        "background": background, 
+        "name": name,
+        "score": score,
+        "limit": limit,
+        "length": length,
+        "genres": genres
+    }
 
     return data
+
+def formatMovieLength(length):
+    hour = length / 60
+    minute = length % 60
+
+    return str(hour) + "h " + str(minute) + "m"
