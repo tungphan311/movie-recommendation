@@ -17,7 +17,8 @@ def index():
 @cross_origin()
 def register():
     return auth_register()
-        
+
+
 @app.route("/api/login", methods=['POST'])
 @cross_origin()
 def login():
@@ -32,7 +33,9 @@ def get_recommend():
     return recommend(id)
 
 
-@app.route("/api/movies/<id>")
+@app.route("/api/movies/<id>", methods=['POST'])
 @cross_origin()
 def get_movie_by_id(id=0):
-    return movie_get_by_id(id)
+    data = request.get_json()
+    user_id = data.get("user_id", 0)
+    return movie_get_by_id(id, user_id)
