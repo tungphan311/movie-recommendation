@@ -83,3 +83,24 @@ def user_review(user_id, id, headline, body):
 
     db.session.commit()
     return create_response(200, "Update review for movie successfully")
+
+
+def get_user_review(id, user_id):
+    # query from request info
+    movie = Movie.query.filter_by(tmdb_id=id).first()
+    review = Review.query.filter_by(movie_id=movie.id, user_id=user_id).first()
+
+    res = {}
+
+    if review is not None:
+        res = {
+            "headline": review.headline,
+            "body": review.body
+        }
+    else:
+        res = {
+            "headline": "",
+            "body": ""
+        }
+
+    return create_response(200, "Success", data=res)

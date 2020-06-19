@@ -3,7 +3,7 @@ from flask import request
 from flask_cors import cross_origin
 from routes.auth import auth_register, auth_login
 from routes.recommendation import recommend
-from routes.movie import movie_get_by_id, movie_rating, remove_rating, user_review
+from routes.movie import movie_get_by_id, movie_rating, remove_rating, user_review, get_user_review
 from routes.user import add_movie_to_favorite
 from app.response import create_response
 
@@ -85,3 +85,9 @@ def add_review(id=0):
         return user_review(user_id, id, headline, body)
     else:
         return create_response(400, "Request data invalid")
+
+
+@app.route("/api/movies/<id>/review/<user_id>")
+@cross_origin()
+def get_movie_review(id=0, user_id=0):
+    return get_user_review(id, user_id)
