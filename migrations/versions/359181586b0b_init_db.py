@@ -1,8 +1,8 @@
-"""init db
+"""init DB
 
-Revision ID: 4e2841fd5a3b
+Revision ID: 359181586b0b
 Revises: 
-Create Date: 2020-06-18 17:50:45.189518
+Create Date: 2020-06-19 15:51:52.332088
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '4e2841fd5a3b'
+revision = '359181586b0b'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -31,6 +31,14 @@ def upgrade():
     sa.Column('password_hash', sa.String(length=128), nullable=True),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('email')
+    )
+    op.create_table('favorite',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('movie_id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['movie_id'], ['movie.id'], ),
+    sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
+    sa.PrimaryKeyConstraint('id')
     )
     op.create_table('rating',
     sa.Column('id', sa.Integer(), nullable=False),
@@ -76,6 +84,7 @@ def downgrade():
     op.drop_table('review')
     op.drop_index(op.f('ix_rating_timestamp'), table_name='rating')
     op.drop_table('rating')
+    op.drop_table('favorite')
     op.drop_table('user')
     op.drop_table('movie')
     # ### end Alembic commands ###

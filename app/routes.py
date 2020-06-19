@@ -4,6 +4,7 @@ from flask_cors import cross_origin
 from routes.auth import auth_register, auth_login
 from routes.recommendation import recommend
 from routes.movie import movie_get_by_id, movie_rating, remove_rating
+from routes.user import add_movie_to_favorite
 
 
 @app.route('/')
@@ -54,3 +55,13 @@ def rate_movie(id=0):
 @cross_origin()
 def delete_movie_rating(id=0, user_id=0):
     return remove_rating(id, user_id)
+
+
+@app.route("/api/favorites", methods=['POST'])
+@cross_origin()
+def add_to_favorites():
+    data = request.get_json()
+    user_id = data.get("user_id", 0)
+    movie_id = data.get("movie_id", 0)
+
+    return add_movie_to_favorite(user_id, movie_id)
