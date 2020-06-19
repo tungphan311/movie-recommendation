@@ -40,6 +40,10 @@ def get_recommend():
 def get_movie_by_id(id=0):
     data = request.get_json()
     user_id = data.get("user_id", 0)
+
+    if user_id == 0:
+        return create_response(400, "Request info invalid")
+
     return movie_get_by_id(id, user_id)
 
 
@@ -77,7 +81,7 @@ def add_review(id=0):
     body = data.get("body", "")
 
     # validate request data:
-    if len(body) > 0 and len(headline) > 50 and len(headline) < 500:
+    if len(headline) > 0 and len(body) > 50 and len(body) < 500:
         return user_review(user_id, id, headline, body)
     else:
         return create_response(400, "Request data invalid")
