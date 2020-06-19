@@ -50,9 +50,7 @@ def rate_movie(id=0):
     return movie_rating(id, user_id, rated)
 
 
-@app.route("/api/movies/<id>/rate", methods=['DELETE'])
+@app.route("/api/movies/<id>/rate/<user_id>", methods=['DELETE'])
 @cross_origin()
-def delete_movie_rating(id=0):
-    data = request.get_json()
-    user_id = data.get("user_id", 0)
+def delete_movie_rating(id=0, user_id=0):
     return remove_rating(id, user_id)

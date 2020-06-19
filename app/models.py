@@ -10,10 +10,10 @@ class User(db.Model):
     ratings = db.relationship('Rating', backref='author', lazy='dynamic')
     reviews = db.relationship('Review', backref='review', lazy='dynamic')
     views = db.relationship('View', backref='view', lazy='dynamic')
+    favorites = db.relationship('Favorite', backref='author', lazy='dynamic')
 
     def __repr__(self):
         return '<User {}>'.format(self.username)
-
 
     def hash_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -30,6 +30,7 @@ class Movie(db.Model):
     ratings = db.relationship('Rating', backref='movie', lazy='dynamic')
     reviews = db.relationship('Review', backref='movie_review', lazy='dynamic')
     views = db.relationship('View', backref='movie_view', lazy='dynamic')
+    favorites = db.relationship('Favorite', backref='movie', lazy='dynamic')
 
     def __repr__(self):
         return '<Movie {}>'.format(self.ratings)
@@ -66,3 +67,12 @@ class View(db.Model):
 
     def __repr__(self):
         return '<View {}>'.format(self.user_id)
+
+
+class Favorite(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    movie_id = db.Column(db.Integer, db.ForeignKey('movie.id'), nullable=False)
+
+    def __repr__(self):
+        return '<Favorite {}>'.format(self.user_id)
