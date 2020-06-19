@@ -3,8 +3,9 @@ from flask import request
 from flask_cors import cross_origin
 from routes.auth import auth_register, auth_login
 from routes.recommendation import recommend
-from routes.movie import movie_get_by_id, movie_rating, remove_rating
+from routes.movie import movie_get_by_id, movie_rating, remove_rating, user_review
 from routes.user import add_movie_to_favorite
+from app.response import create_response
 
 
 @app.route('/')
@@ -65,3 +66,18 @@ def add_to_favorites():
     movie_id = data.get("movie_id", 0)
 
     return add_movie_to_favorite(user_id, movie_id)
+
+
+@app.route("/api/movies/<id>/reviews", methods=['POST'])
+@cross_origin()
+def add_review(id=0):
+    data = request.get_json()
+    user_id = data.get("user_id", 0)
+    headline = data.get("headline", "")
+    body = data.get("body", "")
+
+    # validate request data:
+    if len(body) > 0 and len(headline) > 50 and len(headline) < 500:
+        return user_review(user_id, id, headline, body)
+    else:
+        return create_response(400, "Request data invalid")

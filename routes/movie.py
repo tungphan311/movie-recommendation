@@ -65,3 +65,21 @@ def remove_rating(id, user_id):
         db.session.commit()
 
     return create_response(200, "Delete movie's rating successfully")
+
+
+def user_review(user_id, id, headline, body):
+    # query from request info
+    movie = Movie.query.filter_by(tmdb_id=id).first()
+    review = Review.query.filter_by(movie_id=movie.id, user_id=user_id).first()
+
+    if review is not None:
+        review.headline = headline
+        review.body = body
+        db.session.add(review)
+    else:
+        r = Review(headline=headline, body=body,
+                   user_id=user_id, movie_id=movie.id)
+        db.session.add(r)
+
+    db.session.commit()
+    return create_response(200, "Update review for movie successfully")
