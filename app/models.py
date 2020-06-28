@@ -11,6 +11,7 @@ class User(db.Model):
     reviews = db.relationship('Review', backref='review', lazy='dynamic')
     views = db.relationship('View', backref='view', lazy='dynamic')
     favorites = db.relationship('Favorite', backref='author', lazy='dynamic')
+    recommends = db.relationship('Recommend', backref='target', lazy='dynamic')
 
     def __repr__(self):
         return '<User {}>'.format(self.username)
@@ -22,6 +23,15 @@ class User(db.Model):
         return check_password_hash(self.password_hash, password)
 
 
+class Recommend(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    movie_id = db.Column(db.Integer, db.ForeignKey('movie.id'), nullable=False)
+
+    def __repr__(self):
+        return '<Recommend {}>'.format(self.movie_id)
+
+
 class Movie(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(128))
@@ -31,6 +41,7 @@ class Movie(db.Model):
     reviews = db.relationship('Review', backref='movie_review', lazy='dynamic')
     views = db.relationship('View', backref='movie_view', lazy='dynamic')
     favorites = db.relationship('Favorite', backref='movie', lazy='dynamic')
+    recommends = db.relationship('Recommend', backref='movie', lazy='dynamic')
 
     def __repr__(self):
         return '<Movie {}>'.format(self.ratings)
@@ -39,7 +50,7 @@ class Movie(db.Model):
 class Rating(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     rating = db.Column(db.Integer)
-    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.now)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     movie_id = db.Column(db.Integer, db.ForeignKey('movie.id'), nullable=False)
 
@@ -51,7 +62,7 @@ class Review(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     headline = db.Column(db.String(128))
     body = db.Column(db.String(500))
-    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.now)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     movie_id = db.Column(db.Integer, db.ForeignKey('movie.id'), nullable=False)
 
@@ -61,7 +72,7 @@ class Review(db.Model):
 
 class View(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.now)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     movie_id = db.Column(db.Integer, db.ForeignKey('movie.id'), nullable=False)
 

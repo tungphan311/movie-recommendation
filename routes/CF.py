@@ -101,10 +101,10 @@ class CF(object):
                 rating = self.__pred(u, i)
                 
                 if rating > 0:
-                    recommend_items.append(i)
+                    recommend_items.append((i, rating))
                     
         # sort list recommend from highest predicted rating to lowest
-        # recommend_items.sort(key=lambda tup: tup[1], reverse=True)
+        recommend_items.sort(key=lambda tup: tup[1], reverse=True)
         
         return recommend_items
     

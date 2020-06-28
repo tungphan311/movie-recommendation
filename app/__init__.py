@@ -1,9 +1,10 @@
-from flask import Flask, Response, jsonify
+from flask import Flask
 from config import Config
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
+
 
 app = Flask(__name__)
 
@@ -20,5 +21,4 @@ app.config['CORS_HEADERS'] = 'Content-Type'
 app.config['JWT_SECRET_KEY'] = 'movie-recommendation-server-secret-key'
 jwt = JWTManager(app)
 
-
-from app import routes, models, jwt
+from app import routes, models, response, recommend

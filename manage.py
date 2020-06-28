@@ -29,25 +29,23 @@ def seed():
         mv = pd.read_csv("dataset/movies.csv")
         links = pd.read_csv("dataset/links.csv")
 
-        for index, row in mv.iterrows(): 
+        for index, row in mv.iterrows():
             tmdb_id = links.loc[index, 'tmdbId']
-            if row['movieId'] < 10181:
-                m = Movie(id=row['movieId'], title=row['title'],
-                        genres=row['genres'], tmdb_id=tmdb_id)
-                db.session.add(m)
+            m = Movie(id=row['movieId'], title=row['title'],
+                      genres=row['genres'], tmdb_id=tmdb_id)
+            db.session.add(m)
 
     ratings = Rating.query.all()
     if len(ratings) == 0:
         rt = pd.read_csv("dataset/ratings.csv")
-        
+
         for index, row in rt.iterrows():
-            time = datetime.datetime.utcfromtimestamp(1347517370)
+            time = datetime.datetime.fromtimestamp(1347517370)
             rating = int(round(row['rating']))
 
-            if row['movieId'] < 10181:
-                r = Rating(rating=rating, timestamp=time,
-                        user_id=row['userId'], movie_id=row['movieId'])
-                db.session.add(r)
+            r = Rating(rating=rating, timestamp=time,
+                       user_id=row['userId'], movie_id=row['movieId'])
+            db.session.add(r)
 
     db.session.commit()
 

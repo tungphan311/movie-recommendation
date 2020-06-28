@@ -1,8 +1,8 @@
-"""init DB
+"""updateDB
 
-Revision ID: 359181586b0b
+Revision ID: fc6fce7d44e1
 Revises: 
-Create Date: 2020-06-19 15:51:52.332088
+Create Date: 2020-06-26 00:32:01.603286
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '359181586b0b'
+revision = 'fc6fce7d44e1'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -51,6 +51,14 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_rating_timestamp'), 'rating', ['timestamp'], unique=False)
+    op.create_table('recommend',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('movie_id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['movie_id'], ['movie.id'], ),
+    sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
     op.create_table('review',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('headline', sa.String(length=128), nullable=True),
@@ -82,6 +90,7 @@ def downgrade():
     op.drop_table('view')
     op.drop_index(op.f('ix_review_timestamp'), table_name='review')
     op.drop_table('review')
+    op.drop_table('recommend')
     op.drop_index(op.f('ix_rating_timestamp'), table_name='rating')
     op.drop_table('rating')
     op.drop_table('favorite')
