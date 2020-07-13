@@ -1,5 +1,6 @@
 from app import app, db
 from app.models import User, Movie, Rating
+from app.search import add_to_index
 from flask_script import Manager
 import random
 import string
@@ -24,17 +25,6 @@ def seed():
             u.hash_password("123456")
             db.session.add(u)
 
-    movies = Movie.query.all()
-    if len(movies) == 0:
-        mv = pd.read_csv("dataset/movies.csv")
-        links = pd.read_csv("dataset/links.csv")
-
-        for index, row in mv.iterrows():
-            tmdb_id = links.loc[index, 'tmdbId']
-            m = Movie(id=row['movieId'], title=row['title'],
-                      genres=row['genres'], tmdb_id=tmdb_id)
-            db.session.add(m)
-
     ratings = Rating.query.all()
     if len(ratings) == 0:
         rt = pd.read_csv("dataset/ratings.csv")
@@ -47,8 +37,25 @@ def seed():
                        user_id=row['userId'], movie_id=row['movieId'])
             db.session.add(r)
 
-    db.session.commit()
+    movies = Movie.query.all()
+    if len(movies) == 0:
+        mv = pd.read_csv("dataset/movies.csv")
+        links = pd.read_csv("dataset/links.csv")
 
+        for index, row in mv.iterrows():
+            tmdb_id = links.loc[index, 'tmdbId']
+
+            total = 0
+            rating_list = Rating.query.filter_by(movie_id=row['movieId']).all()
+            for r in rating_list:
+                total += r.rating
+            avg = total / len(rating_list) if len(rating_list) > 0 else 0
+
+            m = Movie(id=row['movieId'], title=row['title'],
+                      genres=row['genres'], tmdb_id=tmdb_id, rating=avg)
+            db.session.add(m)
+
+    db.session.commit()
 
 if __name__ == "__main__":
     manager.run()
