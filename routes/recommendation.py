@@ -4,10 +4,8 @@ import requests
 from routes.CF import CF
 from app.response import create_response
 from app.models import Movie
+from app import app
 
-IMG_URL = "http://images.tmdb.org/t/p/original"
-IMG_DEFAULT = "https://www.reelviews.net/resources/img/default_poster.jpg"
-BACKDROP_DEFAULT = "https://www.salonlfc.com/wp-content/uploads/2018/01/image-not-found-scaled-1150x647.png"
 
 def recommend(id):
     if id == 0:
@@ -40,12 +38,15 @@ def recommend(id):
     return create_response(200, "Lấy danh sách thành công", data=response)
 
 def get_movie_by_id(id, movieId):
-    url = "https://api.themoviedb.org/3/movie/" + str(movieId) + "?api_key=066517db09e2fe16a0fa2c0fbcb16ce0"
+    url = "https://api.themoviedb.org/3/movie/" + \
+        str(movieId) + "?api_key=" + app.config['API_KEY']
 
     res = requests.get(url).json()
 
-    avatar = IMG_URL + res['poster_path'] if res['poster_path'] is not None else IMG_DEFAULT
-    background = IMG_URL + res['backdrop_path'] if res['backdrop_path'] is not None else BACKDROP_DEFAULT
+    avatar = app.config['IMG_URL'] + \
+        res['poster_path'] if res['poster_path'] is not None else app.config['IMG_DEFAULT']
+    background = app.config['IMG_URL'] + \
+        res['backdrop_path'] if res['backdrop_path'] is not None else app.config['BACKDROP_DEFAULT']
     name = res['original_title']
     score = res['vote_average']
     limit = '18+' if res['adult'] == True else '13+'
