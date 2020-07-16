@@ -39,14 +39,15 @@ def seed():
             db.session.add(r)
 
     movies = Movie.query.all()
-    if len(movies) == 0:
-        mv = pd.read_csv("dataset/movies.csv")
-        links = pd.read_csv("dataset/links.csv")
+    # if len(movies) == 0:
+    mv = pd.read_csv("dataset/movies.csv")
+    links = pd.read_csv("dataset/links.csv")
 
-        for index, row in mv.iterrows():
-            tmdb_id = links.loc[index, 'tmdbId']
-            id = row['movieId']
+    for index, row in mv.iterrows():
+        tmdb_id = links.loc[index, 'tmdbId']
+        id = row['movieId']
 
+        if id >= 7000:
             url = "https://api.themoviedb.org/3/movie/" + \
                 str(tmdb_id) + "?api_key=" + app.config['API_KEY']
             credits_url = "https://api.themoviedb.org/3/movie/" + \
@@ -60,31 +61,46 @@ def seed():
                 str(tmdb_id) + "/videos?api_key=" + \
                 app.config['API_KEY']
 
-            res = requests.get(url).json()
-            credits = requests.get(credits_url).json()
-            keywords_json = requests.get(keywords_url).json()
-            keywords = keywords_json['keywords']
-            releases = requests.get(release_url).json()
-            videos_json = requests.get(video_url).json()
-            videos = videos_json['results']
+            result = requests.get(url)
+            res = result.json() if result.status_code == 200 else None
+
+            credits_res = requests.get(credits_url)
+            credits = credits_res.json() if credits_res.status_code == 200 else None
+
+            keywords_res = requests.get(keywords_url)
+            keywords = keywords_res.json()['keywords'] if keywords_res.status_code == 200 else []
+
+            releases_res = requests.get(release_url)
+            releases = releases_res.json() if releases_res.status_code == 200 else None
+
+            videos_res = requests.get(video_url)
+            videos = videos_res.json()['results'] if videos_res.status_code == 200 else []
 
             poster_path = app.config['IMG_URL'] + \
-                res['poster_path'] if res['poster_path'] is not None else app.config['IMG_DEFAULT']
+            str(res['poster_path']) if res is not None else app.config['IMG_DEFAULT']
             backdrop_path = app.config['IMG_URL'] + \
-                res['backdrop_path'] if res['backdrop_path'] is not None else app.config['BACKDROP_DEFAULT']
-            original_title = res['original_title']
-            vote_average = res['vote_average']
-            vote_count = res['vote_count']
-            runtime = res['runtime']
-            genres = res['genres']
-            release_date = res['release_date']
-            overview = res['overview']
+                str(res['backdrop_path']) if res is not None else app.config['BACKDROP_DEFAULT']
+            original_title = res['original_title'] if res is not None else row['title']
+            vote_average = res['vote_average'] if res is not None else 0
+            vote_count = res['vote_count'] if res is not None else 0
+            runtime = res['runtime'] if res is not None else 0
+            genres = res['genres'] if res is not None else []
+            release_date = res['release_date'] if res is not None else '2000'
+            overview = res['overview'] if res is not None else ''
 
-            release_dates = releases['results'][0]['release_dates']
-            certification = release_dates[0]['certification']
+            certification = "G"
 
-            casts = credits['cast']
-            crews = credits['crew']
+            if releases is not None:
+                release_results = releases['results']
+
+                if len(release_results) > 0:
+                    release_dates = release_results[0]['release_dates']
+
+                    if len(release_dates) > 0:
+                        certification = release_dates[0]['certification']
+
+            casts = credits['cast'] if credits is not None else []
+            crews = credits['crew'] if credits is not None else []
 
             credit = Credit()
             db.session.add(credit)
