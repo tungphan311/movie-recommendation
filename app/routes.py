@@ -28,11 +28,9 @@ def login():
     return auth_login()
 
 
-@app.route("/api/recommend")
+@app.route("/api/recommend/<int:id>")
 @cross_origin()
-def get_recommend():
-    data = request.get_json()
-    id = data.get("user_id", 0)
+def get_recommend(id=0):
     return recommend(id)
 
 

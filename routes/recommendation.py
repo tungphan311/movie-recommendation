@@ -3,69 +3,58 @@ import sqlite3 as sql
 import requests
 from routes.CF import CF
 from app.response import create_response
-from app.models import Movie
+from app.models import Movie, MovieGenres, Genre, User, Recommend
 from app import app
 
 
 def recommend(id):
-    if id == 0:
-        return create_response(400, "Tài khoản không hợp lệ")
+    user = User.query.get(id)
 
-    conn = sql.connect("app.db")
-    ratings = pd.read_sql_query("select user_id, movie_id, rating from rating", conn)
+    if user is None:
+        return create_response(400, "Tài khoản không tồn tại")
 
-    rate_train = ratings.to_numpy(dtype="Int64")
+    recommends = Recommend.query.filter_by(user_id=id).all()
 
-    rate_train[:, :2] -= 1
-
-    rs = CF(rate_train, k = 30)
-    rs.fit()
-
-    recommended_items = rs.recommend(id - 1)
-    result = recommended_items[:5]
+    if recommends is None:
+        return create_response(200, "Lấy danh sách thành công", [])
 
     response = []
 
-    for i in range(10):
-        if len(result) > i:
-            movie_id = result[i] + 1
-            movie = Movie.query.get(movie_id)
+    for rec in recommends:
+        data = get_movie_by_id(rec.movie_id)
 
-            data = get_movie_by_id(i+1, movie.tmdb_id)
-            
-            response.append(data)
+        response.append(data)
 
     return create_response(200, "Lấy danh sách thành công", data=response)
 
-def get_movie_by_id(id, movieId):
-    url = "https://api.themoviedb.org/3/movie/" + \
-        str(movieId) + "?api_key=" + app.config['API_KEY']
 
-    res = requests.get(url).json()
+def get_movie_by_id(id):
+    movie = Movie.query.get(id)
 
-    avatar = app.config['IMG_URL'] + \
-        res['poster_path'] if res['poster_path'] is not None else app.config['IMG_DEFAULT']
-    background = app.config['IMG_URL'] + \
-        res['backdrop_path'] if res['backdrop_path'] is not None else app.config['BACKDROP_DEFAULT']
-    name = res['original_title']
-    score = res['vote_average']
-    limit = '18+' if res['adult'] == True else '13+'
-    length = formatMovieLength(res['runtime'])
-    genres = res['genres']
+    length = formatMovieLength(movie.runtime)
+    genres = []
 
-    data = { 
-        "id": id, 
-        "movId": movieId, 
-        "avatar": avatar, 
-        "background": background, 
-        "name": name,
-        "score": score,
-        "limit": limit,
+    movie_genres = MovieGenres.query.filter_by(movie_id=id).all()
+    for gen in movie_genres:
+        genre = Genre.query.get(gen.genre_id)
+        genres.append({
+            "id": genre.id,
+            "name": genre.name
+        })
+
+    data = {
+        "id": id,
+        "avatar": movie.poster_path,
+        "background": movie.backdrop_path,
+        "name": movie.original_title,
+        "score": movie.vote_average,
+        "certification": movie.certification,
         "length": length,
         "genres": genres
     }
 
     return data
+
 
 def formatMovieLength(length):
     hour = length / 60

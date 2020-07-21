@@ -39,15 +39,14 @@ def seed():
             db.session.add(r)
 
     movies = Movie.query.all()
-    # if len(movies) == 0:
-    mv = pd.read_csv("dataset/movies.csv")
-    links = pd.read_csv("dataset/links.csv")
+    if len(movies) == 0:
+        mv = pd.read_csv("dataset/movies.csv")
+        links = pd.read_csv("dataset/links.csv")
 
-    for index, row in mv.iterrows():
-        tmdb_id = links.loc[index, 'tmdbId']
-        id = row['movieId']
+        for index, row in mv.iterrows():
+            tmdb_id = links.loc[index, 'tmdbId']
+            id = row['movieId']
 
-        if id >= 7000:
             url = "https://api.themoviedb.org/3/movie/" + \
                 str(tmdb_id) + "?api_key=" + app.config['API_KEY']
             credits_url = "https://api.themoviedb.org/3/movie/" + \
@@ -68,18 +67,22 @@ def seed():
             credits = credits_res.json() if credits_res.status_code == 200 else None
 
             keywords_res = requests.get(keywords_url)
-            keywords = keywords_res.json()['keywords'] if keywords_res.status_code == 200 else []
+            keywords = keywords_res.json(
+            )['keywords'] if keywords_res.status_code == 200 else []
 
             releases_res = requests.get(release_url)
             releases = releases_res.json() if releases_res.status_code == 200 else None
 
             videos_res = requests.get(video_url)
-            videos = videos_res.json()['results'] if videos_res.status_code == 200 else []
+            videos = videos_res.json(
+            )['results'] if videos_res.status_code == 200 else []
 
             poster_path = app.config['IMG_URL'] + \
-            str(res['poster_path']) if res is not None else app.config['IMG_DEFAULT']
+                str(res['poster_path']
+                    ) if res is not None else app.config['IMG_DEFAULT']
             backdrop_path = app.config['IMG_URL'] + \
-                str(res['backdrop_path']) if res is not None else app.config['BACKDROP_DEFAULT']
+                str(res['backdrop_path']
+                    ) if res is not None else app.config['BACKDROP_DEFAULT']
             original_title = res['original_title'] if res is not None else row['title']
             vote_average = res['vote_average'] if res is not None else 0
             vote_count = res['vote_count'] if res is not None else 0
@@ -111,7 +114,8 @@ def seed():
                 c = Crew.query.filter_by(name=crew['name']).first()
 
                 if c is None:
-                    new_crew = Crew(name=crew['name'], department=crew['department'])
+                    new_crew = Crew(name=crew['name'],
+                                    department=crew['department'])
                     db.session.add(new_crew)
                     db.session.flush()
                     db.session.refresh(new_crew)
@@ -123,14 +127,14 @@ def seed():
                     credit_crew = CreditCrews(
                         credit_id=credit.id, crew_id=c.id)
                     db.session.add(credit_crew)
-            
+
             for cast in casts:
                 c = Cast.query.filter_by(name=cast['name']).first()
 
                 if c is None:
                     image = app.config['IMG_URL'] + str(cast['profile_path'])
                     new_cast = Cast(character=cast['character'], name=cast['name'],
-                            image=image)
+                                    image=image)
                     db.session.add(new_cast)
                     db.session.flush()
                     db.session.refresh(new_cast)
@@ -149,9 +153,9 @@ def seed():
                 total += r.rating
             avg = total / len(rating_list) if len(rating_list) > 0 else 0
 
-            m = Movie(id=id, title=row['title'], original_title=original_title, tmdb_id=tmdb_id, rating=avg, 
-                    backdrop_path=backdrop_path, poster_path=poster_path, release_date=release_date, runtime=runtime, overview=overview, 
-                        vote_average=vote_average, vote_count=vote_count, credit_id=credit.id, certification=certification)
+            m = Movie(id=id, title=row['title'], original_title=original_title, tmdb_id=tmdb_id, rating=avg,
+                      backdrop_path=backdrop_path, poster_path=poster_path, release_date=release_date, runtime=runtime, overview=overview,
+                      vote_average=vote_average, vote_count=vote_count, credit_id=credit.id, certification=certification)
             db.session.add(m)
             db.session.flush()
             db.session.refresh(m)
@@ -191,8 +195,9 @@ def seed():
                 else:
                     gen = MovieGenres(movie_id=m.id, genre_id=g.id)
                     db.session.add(gen)
-    
+
     db.session.commit()
+
 
 if __name__ == "__main__":
     manager.run()
