@@ -57,7 +57,7 @@ def get_movie_by_id(id):
 
 
 def formatMovieLength(length):
-    hour = length / 60
+    hour = int(length / 60)
     minute = length % 60
 
     return str(hour) + "h " + str(minute) + "m"

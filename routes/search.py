@@ -43,4 +43,4 @@ def search_movie(key, page):
         for q in query.items:
             response.append(q.id)
 
-    return create_response(200, 'Success', data=response, total=len(response))
+    return create_response(200, 'Success', data=response)

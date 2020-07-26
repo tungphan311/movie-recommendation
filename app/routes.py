@@ -7,6 +7,16 @@ from routes.movie import movie_get_by_id, movie_rating, remove_rating, user_revi
 from routes.user import add_movie_to_favorite
 from routes.search import search_movie
 from app.response import create_response
+from flask_jwt_extended import jwt_required, get_jwt_identity
+import json
+
+
+def get_authorization():
+    user = json.loads(get_jwt_identity())
+    id = user.get('id')
+    email = user.get('email')
+
+    return id, email
 
 
 @app.route('/')
@@ -34,14 +44,11 @@ def get_recommend(id=0):
     return recommend(id)
 
 
-@app.route("/api/movies/<id>", methods=['POST'])
+@app.route("/api/movies/<int:id>")
 @cross_origin()
+@jwt_required
 def get_movie_by_id(id=0):
-    data = request.get_json()
-    user_id = data.get("user_id", 0)
-
-    if user_id == 0:
-        return create_response(400, "Request info invalid")
+    user_id, _ = get_authorization() 
 
     return movie_get_by_id(id, user_id)
 
@@ -100,3 +107,10 @@ def search():
     key = data.get("key", "", type=str)
 
     return search_movie(key, page)
+
+
+@app.route("/api/check-token")
+@jwt_required
+def protected():
+    id, email = get_authorization()
+    return create_response(200, 'Token is valid', { 'id': id, 'email': email })

@@ -1,10 +1,11 @@
-from flask import request, make_response, jsonify
+from flask import request, make_response
 from flask_jwt_extended import create_access_token
 from app import app, db
 from app.models import User
 from app.response import Response, create_response
 import re
 import json
+import datetime
 
 
 class Token:
@@ -45,7 +46,8 @@ def auth_register():
 
 def create_token(user):
     identity = Token(user.id, user.email).to_json()
-    token = create_access_token(identity=identity)
+    expires = datetime.timedelta(days=1)
+    token = create_access_token(identity=identity, expires_delta=expires)
     return token
 
 
