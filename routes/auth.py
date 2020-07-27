@@ -74,8 +74,18 @@ def auth_login():
         return create_response(401, "Email or password is not correct")
     else:
         if user.check_password(password):
-            token = create_token(user)
+            data = create_token(user)
 
-            return create_response(200, "Login successfully", data=token)
+            return create_response(200, "Login successfully", data=data)
         else:
             return create_response(401, "Email or password is not correct")
+
+
+def refresh(id, email):
+    identity = Token(id, email).to_json()
+    expires = datetime.timedelta(hours=1)
+    res = {
+        'token': create_access_token(identity=identity, expires_delta=expires)
+    }
+
+    return create_response(200, "Refreshed token", data=res)
