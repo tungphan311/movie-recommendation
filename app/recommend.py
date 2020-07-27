@@ -30,6 +30,10 @@ def run_recommend_alg():
     for id in range(nums_user):
         rating = Rating.query.filter_by(user_id=id+1).order_by(
             Rating.timestamp.desc()).first()
+        
+        if rating is None:
+            continue
+
         date = rating.timestamp
         day = date.day
         month = date.month
@@ -66,7 +70,7 @@ def recommend():
 
 
 schedule = BackgroundScheduler()
-schedule.add_job(func=recommend, trigger="cron", hour="1", minute="0")
+schedule.add_job(func=recommend, trigger="cron", hour="2", minute="5")
 schedule.start()
 
 atexit.register(lambda: schedule.shutdown())
