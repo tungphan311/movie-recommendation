@@ -2,4 +2,3 @@ venv/Include
 venv/Lib
 .vscode
 __pycache__
-app.db
