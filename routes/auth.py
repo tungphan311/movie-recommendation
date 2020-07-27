@@ -1,5 +1,5 @@
 from flask import request, make_response
-from flask_jwt_extended import create_access_token
+from flask_jwt_extended import create_access_token, create_refresh_token
 from app import app, db
 from app.models import User
 from app.response import Response, create_response
@@ -35,9 +35,9 @@ def auth_register():
             db.session.flush()
             db.session.commit()
 
-            token = create_token(u)
+            data = create_token(u)
 
-            return create_response(201, "Create account successfully", data=token)
+            return create_response(201, "Create account successfully", data=data)
         else:
             return create_response(400, "Email is already taken")
     else:
@@ -46,9 +46,12 @@ def auth_register():
 
 def create_token(user):
     identity = Token(user.id, user.email).to_json()
-    expires = datetime.timedelta(days=1)
-    token = create_access_token(identity=identity, expires_delta=expires)
-    return token
+    expires = datetime.timedelta(hours=1)
+    res = {
+        'token': create_access_token(identity=identity, expires_delta=expires),
+        'refresh_token': create_refresh_token(identity=identity, expires_delta=datetime.timedelta(days=1))
+    }
+    return res
 
 
 def user_existed(email):
