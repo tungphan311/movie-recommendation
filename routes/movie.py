@@ -3,6 +3,7 @@ from app.response import create_response
 from app import db
 from routes.validate import valid_user, valid_movie
 from routes.recommendation import formatMovieLength
+from routes.credit import get_credits
 import datetime
 
 
@@ -42,6 +43,8 @@ def movie_get_by_id(id, user_id):
             "name": genre.name
         })
 
+    casts, director, writings = get_credits(movie.credit_id)
+
     res = {
         "rating": avg_rating,
         "total_rating": len(ratings),
@@ -55,7 +58,11 @@ def movie_get_by_id(id, user_id):
         "score": movie.vote_average,
         "certification": movie.certification,
         "length": formatMovieLength(movie.runtime),
-        "genres": genres
+        "genres": genres,
+        "release_date": movie.release_date,
+        "casts": casts,
+        "director": director,
+        "writers": writings,
     }
 
     mes = "Get movie's info with id = " + str(id) + " successfully."
