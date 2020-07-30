@@ -14,28 +14,36 @@ def get_movie_by_id(id=0):
 
 
 @app.route("/api/movies/<int:id>/rate", methods=['POST'])
+@jwt_required
 def rate_movie(id=0):
+    user_id, _ = get_authorization()
+
     data = request.get_json()
-    user_id = data.get("user_id", 0)
     rated = data.get("rated", 0)
     return movie_rating(id, user_id, rated)
 
 
-@app.route("/api/movies/<int:id>/rate/<int:user_id>", methods=['DELETE'])
-def delete_movie_rating(id=0, user_id=0):
+@app.route("/api/movies/<int:id>/rate", methods=['DELETE'])
+@jwt_required
+def delete_movie_rating(id=0):
+    user_id, _ = get_authorization()
+    
     return remove_rating(id, user_id)
 
 
 @app.route("/api/movies/<int:id>/reviews", methods=['POST'])
+@jwt_required
 def add_review(id=0):
+    user_id, _ = get_authorization()
+
     data = request.get_json()
-    user_id = data.get("user_id", 0)
+    rated = data.get("rated", 0)
     headline = data.get("headline", "")
     body = data.get("body", "")
 
     # validate request data:
     if len(headline) > 0 and len(body) > 50 and len(body) < 500:
-        return user_review(user_id, id, headline, body)
+        return user_review(user_id, id, headline, body, rated)
     else:
         return create_response(400, "Request data invalid")
 

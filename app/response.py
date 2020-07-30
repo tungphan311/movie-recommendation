@@ -11,11 +11,13 @@ class Response:
     def default_json(self, value):
         if isinstance(value, datetime.timedelta):
             return dict(days=value.days)
+        elif isinstance(value, datetime.datetime):
+            return value.__str__()
         else:
             return value.__dict__
 
     def to_json(self):
-        return json.dumps(self, default=self.default_json, indent=2, ensure_ascii=False).encode('utf8')
+        return json.dumps(self, default=self.default_json, indent=4, ensure_ascii=False).encode('utf8')
 
 
 def create_response(code, msg, data=[]):
