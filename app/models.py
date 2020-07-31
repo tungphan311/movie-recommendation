@@ -88,7 +88,6 @@ class Movie(SearchableMixin, db.Model):
     runtime = db.Column(db.Integer)
     overview = db.Column(db.String)
     certification = db.Column(db.String(120))
-    credit_id = db.Column(db.Integer)
     # ratings = db.relationship('Rating', backref='movie', lazy=True)
     # reviews = db.relationship('Review', backref='movie_review', lazy=True)
     # views = db.relationship('View', backref='movie_view', lazy=True)
@@ -135,23 +134,21 @@ class Keyword(db.Model):
     def __repr__(self):
         return '<Keyword {}>'.format(self.name)
 
-class Credit(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-
 class CreditCrews(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    credit_id = db.Column(db.Integer)
+    movie_id = db.Column(db.Integer)
     crew_id = db.Column(db.Integer)
+    department = db.Column(db.String(120))
 
 class CreditCasts(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    credit_id = db.Column(db.Integer)
+    movie_id = db.Column(db.Integer)
     cast_id = db.Column(db.Integer)
     order = db.Column(db.Integer)
+    character = db.Column(db.String(120))
 
 class Crew(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    department = db.Column(db.String(120))
     name = db.Column(db.String(120))
     # credit_id = db.Column(db.Integer, db.ForeignKey('credit.id'), nullable=False)
 
@@ -160,7 +157,6 @@ class Crew(db.Model):
 
 class Cast(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    character = db.Column(db.String(120))
     name = db.Column(db.String(120))
     image = db.Column(db.String(120))
     # credit_id = db.Column(db.Integer, db.ForeignKey(

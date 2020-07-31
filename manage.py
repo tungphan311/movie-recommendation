@@ -1,12 +1,14 @@
 from app import app, db
-from app.models import User, Movie, Rating, Credit, Cast, Crew, Keyword, MovieKeywords, CreditCrews, CreditCasts, Genre, MovieGenres, Video
+from app.models import User, Movie, Rating, Cast, Crew, Keyword, MovieKeywords, CreditCrews, CreditCasts, Genre, MovieGenres, Video
 from app.search import add_to_index
 from flask_script import Manager
 import random
 import string
 import pandas as pd
+import sqlite3 as sql
 import datetime
 import requests
+from ast import literal_eval
 
 manager = Manager(app)
 
@@ -39,11 +41,12 @@ def seed():
             db.session.add(r)
 
     movies = Movie.query.all()
-    if len(movies) == 0:
-        mv = pd.read_csv("dataset/movies.csv")
-        links = pd.read_csv("dataset/links.csv")
+    # if len(movies) == 0:
+    mv = pd.read_csv("dataset/movies.csv")
+    links = pd.read_csv("dataset/links.csv")
 
-        for index, row in mv.iterrows():
+    for index, row in mv.iterrows():
+        if row['movieId'] > 2389:
             tmdb_id = links.loc[index, 'tmdbId']
             id = row['movieId']
 
@@ -105,48 +108,6 @@ def seed():
             casts = credits['cast'] if credits is not None else []
             crews = credits['crew'] if credits is not None else []
 
-            credit = Credit()
-            db.session.add(credit)
-            db.session.flush()
-            db.session.refresh(credit)
-
-            for crew in crews:
-                c = Crew.query.filter_by(name=crew['name']).first()
-
-                if c is None:
-                    new_crew = Crew(name=crew['name'],
-                                    department=crew['department'])
-                    db.session.add(new_crew)
-                    db.session.flush()
-                    db.session.refresh(new_crew)
-
-                    credit_crew = CreditCrews(
-                        credit_id=credit.id, crew_id=new_crew.id)
-                    db.session.add(credit_crew)
-                else:
-                    credit_crew = CreditCrews(
-                        credit_id=credit.id, crew_id=c.id)
-                    db.session.add(credit_crew)
-
-            for cast in casts:
-                c = Cast.query.filter_by(name=cast['name']).first()
-
-                if c is None:
-                    image = app.config['IMG_URL'] + str(cast['profile_path'])
-                    new_cast = Cast(character=cast['character'], name=cast['name'],
-                                    image=image)
-                    db.session.add(new_cast)
-                    db.session.flush()
-                    db.session.refresh(new_cast)
-
-                    credit_cast = CreditCasts(
-                        credit_id=credit.id, cast_id=new_cast.id, order=cast['order'])
-                    db.session.add(credit_cast)
-                else:
-                    credit_cast = CreditCasts(
-                        credit_id=credit.id, cast_id=c.id, order=cast['order'])
-                    db.session.add(credit_cast)
-
             total = 0
             rating_list = Rating.query.filter_by(movie_id=id).all()
             for r in rating_list:
@@ -154,11 +115,46 @@ def seed():
             avg = total / len(rating_list) if len(rating_list) > 0 else 0
 
             m = Movie(id=id, title=row['title'], original_title=original_title, tmdb_id=tmdb_id, rating=avg,
-                      backdrop_path=backdrop_path, poster_path=poster_path, release_date=release_date, runtime=runtime, overview=overview,
-                      vote_average=vote_average, vote_count=vote_count, credit_id=credit.id, certification=certification)
+                    backdrop_path=backdrop_path, poster_path=poster_path, release_date=release_date, runtime=runtime, overview=overview,
+                    vote_average=vote_average, vote_count=vote_count, certification=certification)
             db.session.add(m)
             db.session.flush()
             db.session.refresh(m)
+
+            for crew in crews:
+                c = Crew.query.filter_by(name=crew['name']).first()
+
+                if c is None:
+                    new_crew = Crew(name=crew['name'])
+                    db.session.add(new_crew)
+                    db.session.flush()
+                    db.session.refresh(new_crew)
+
+                    credit_crew = CreditCrews(
+                        movie_id=m.id, crew_id=new_crew.id, department=crew['department'])
+                    db.session.add(credit_crew)
+                else:
+                    credit_crew = CreditCrews(
+                        movie_id=m.id, crew_id=c.id, department=crew['department'])
+                    db.session.add(credit_crew)
+
+            for cast in casts:
+                c = Cast.query.filter_by(name=cast['name']).first()
+
+                if c is None:
+                    image = app.config['IMG_URL'] + str(cast['profile_path'])
+                    new_cast = Cast(name=cast['name'], image=image)
+                    db.session.add(new_cast)
+                    db.session.flush()
+                    db.session.refresh(new_cast)
+
+                    credit_cast = CreditCasts(character=cast['character'],
+                                            movie_id=m.id, cast_id=new_cast.id, order=cast['order'])
+                    db.session.add(credit_cast)
+                else:
+                    credit_cast = CreditCasts(character=cast['character'],
+                                            movie_id=m.id, cast_id=c.id, order=cast['order'])
+                    db.session.add(credit_cast)
 
             for video in videos:
                 v = Video(key=video['key'], name=video['name'], movie_id=m.id)
@@ -196,7 +192,7 @@ def seed():
                     gen = MovieGenres(movie_id=m.id, genre_id=g.id)
                     db.session.add(gen)
 
-    db.session.commit()
+            db.session.commit()
 
 
 if __name__ == "__main__":

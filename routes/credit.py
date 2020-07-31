@@ -1,20 +1,19 @@
-from app.models import Credit, CreditCasts, CreditCrews, Cast, Crew, Video, Review, Rating, User
+from app.models import CreditCasts, CreditCrews, Cast, Crew, Video, Review, Rating, User
 
 def get_credits(id):
-    credit = Credit.query.get(id)
-    creditCasts = CreditCasts.query.filter_by(credit_id=credit.id).limit(5).all()
-    creditCrews = CreditCrews.query.filter_by(credit_id=credit.id).all()
+    creditCasts = CreditCasts.query.filter_by(movie_id=id).limit(5).all()
+    creditCrews = CreditCrews.query.filter_by(movie_id=id).all()
 
     crew = Crew.query\
         .join(CreditCrews, CreditCrews.crew_id == Crew.id)\
-        .filter(CreditCrews.credit_id == credit.id)\
-        .filter(Crew.department == "Directing")\
+        .filter(CreditCrews.movie_id == id)\
+        .filter(CreditCrews.department == "Directing")\
         .first()
 
     writings = Crew.query\
         .join(CreditCrews, CreditCrews.crew_id == Crew.id)\
-        .filter(CreditCrews.credit_id == credit.id)\
-        .filter(Crew.department == "Writing")\
+        .filter(CreditCrews.movie_id == id)\
+        .filter(CreditCrews.department == "Writing")\
         .all()
 
     writing_list = [{'id': w.id,'name': w.name} for w in writings]
@@ -32,7 +31,7 @@ def get_credits(id):
         casts.append({
             'id': cast.id, 
             'name': cast.name,
-            'character': cast.character,
+            'character': c.character,
             'img': cast.image
         })
 

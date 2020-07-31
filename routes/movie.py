@@ -43,7 +43,7 @@ def movie_get_by_id(id, user_id):
             "name": genre.name
         })
 
-    casts, director, writings = get_credits(movie.credit_id)
+    casts, director, writings = get_credits(movie.id)
     videos = get_videos(movie.id)
     review = get_first_review(movie.id)
 
@@ -147,7 +147,12 @@ def user_review(user_id, id, headline, body, rated):
 def get_user_review(id, user_id):
     # query from request info
     movie = Movie.query.get(id)
-    review = Review.query.filter_by(movie_id=movie.id, user_id=user_id).first()
+    user = User.query.get(user_id)
+
+    if movie is None or user is None:
+        return create_response(400, "Invalid request")
+
+    review = Review.query.filter_by(movie_id=id, user_id=user_id).first()
 
     res = {}
 

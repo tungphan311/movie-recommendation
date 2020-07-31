@@ -3,6 +3,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.api.helpers import get_authorization
 from flask import request
 from routes.movie import movie_get_by_id, movie_rating, remove_rating, user_review, get_user_review
+from routes.user import add_movie_to_favorite
 
 
 @app.route("/api/movies/<int:id>")
@@ -48,15 +49,17 @@ def add_review(id=0):
         return create_response(400, "Request data invalid")
 
 
-@app.route("/api/movies/<int:id>/review/<user_id>")
-def get_movie_review(id=0, user_id=0):
+@app.route("/api/movies/<int:id>/review")
+@jwt_required
+def get_movie_review(id=0):
+    user_id, _ = get_authorization()
+    
     return get_user_review(id, user_id)
 
 
 @app.route("/api/movies/<int:id>/favorites", methods=['POST'])
-def add_to_favorites():
-    data = request.get_json()
-    user_id = data.get("user_id", 0)
-    movie_id = data.get("movie_id", 0)
+@jwt_required
+def add_to_favorites(id=0):
+    user_id, _ = get_authorization()
 
-    return add_movie_to_favorite(user_id, movie_id)
+    return add_movie_to_favorite(user_id, id)
