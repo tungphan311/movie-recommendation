@@ -195,5 +195,61 @@ def seed():
             db.session.commit()
 
 
+@manager.command
+def data():
+    conn = sql.connect("app.db")
+    movies = pd.read_sql_query(
+        "select id, title from movie", conn)
+
+    cast_list = []
+    director_list = []
+    keyword_list = []
+    genre_list = []
+
+    for index, row in movies.iterrows():
+        id = row['id']
+
+        casts = Cast.query\
+            .join(CreditCasts, Cast.id == CreditCasts.cast_id)\
+            .filter(CreditCasts.movie_id == id)\
+            .filter(CreditCasts.order < 3)\
+            .all()
+        cast_names = [ cast.name for cast in casts ]
+        cast_list.append(','.join(cast_names))
+
+        keywords = Keyword.query\
+            .join(MovieKeywords, MovieKeywords.keyword_id == Keyword.id)\
+            .filter(MovieKeywords.movie_id == id)\
+            .limit(3)\
+            .all()
+        keyword_names = [ keyword.name for keyword in keywords ]
+        keyword_list.append(','.join(keyword_names))
+
+        director = Crew.query\
+            .join(CreditCrews, CreditCrews.crew_id == Crew.id)\
+            .filter(CreditCrews.movie_id == id)\
+            .filter(CreditCrews.department == "Directing")\
+            .first()
+        if director is None:
+            director_list.append('')
+        else:
+            director_list.append(director.name)
+
+        genres = Genre.query\
+            .join(MovieGenres, MovieGenres.genre_id == Genre.id)\
+            .filter(MovieGenres.movie_id == id)\
+            .limit(3).all()
+        genre_names = [ genre.name for genre in genres ]
+        genre_list.append(','.join(genre_names))
+
+    movies['cast'] = cast_list
+    movies['director'] = director_list
+    movies['keywords'] = keyword_list
+    movies['genres'] = genre_list
+
+    movies.to_csv('dataset/cb.csv', sep='\t', encoding='utf-8')
+
+    print(movies.head())
+
 if __name__ == "__main__":
     manager.run()
