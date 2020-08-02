@@ -1,0 +1,18 @@
+[
+    {
+        "id": 1,
+        "name": "movie_id"
+    },
+    {
+        "id": 2,
+        "name": "rating"
+    },
+    {
+        "id": 3,
+        "name": "headline"
+    },
+    {
+        "id": 4,
+        "name": "body"
+    }
+]

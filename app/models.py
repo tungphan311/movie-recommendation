@@ -220,3 +220,27 @@ class Favorite(db.Model):
 
     def __repr__(self):
         return '<Favorite {}>'.format(self.user_id)
+
+
+class Log(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, nullable=False)
+    action_type_id = db.Column(db.Integer, nullable=False)
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.now)
+
+class ActionType(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(120))
+    description = db.Column(db.String(500))
+
+
+class ActionParameter(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(120))
+
+
+class LogDetail(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    log_id = db.Column(db.Integer, nullable=False)
+    action_parameter_id = db.Column(db.Integer, nullable=False)
+    value = db.Column(db.String(120))

@@ -1,0 +1,47 @@
+[
+    {
+        "id": 1,
+        "name": "REGISTER",
+        "description": "Creates a new account"
+    },
+    {
+        "id": 2,
+        "name": "LOG IN",
+        "description": "Logs into system"
+    },
+    {
+        "id": 3,
+        "name": "LOG OUT",
+        "description": "Logs out of system"
+    },
+    {
+        "id": 4,
+        "name": "VIEW DETAIL",
+        "description": "Views details of movie"
+    },
+    {
+        "id": 5,
+        "name": "RATE",
+        "description": "Rates movie"
+    },
+    {
+        "id": 6,
+        "name": "DELETE RATING",
+        "description": "Delete your rating of movie"
+    },
+    {
+        "id": 7,
+        "name": "REVIEW",
+        "description": "Leaves comment on movie"
+    },
+    {
+        "id": 8,
+        "name": "ADD TO FAVORITE",
+        "description": "Add movie to your favorites"
+    },
+    {
+        "id": 9,
+        "name": "REMOVE FROM FAVORITE",
+        "description": "Remove movie from your favorites"
+    }
+]

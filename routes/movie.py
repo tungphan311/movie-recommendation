@@ -6,6 +6,7 @@ from routes.recommendation import formatMovieLength
 from routes.credit import get_credits, get_videos, get_first_review
 from routes.ContentBase import get_recommendations
 from routes.DemongraphicFiltering import get_most_popular
+from routes.logger import Logger
 import datetime
 
 
@@ -17,6 +18,9 @@ def movie_get_by_id(id, user_id):
         return create_response(404, "Movie's not existed")
 
     res = get_movie(id, user_id)
+
+    logger = Logger(user_id=user_id, action_type_id=4, movie_id=id)
+    logger.create_log()
 
     mes = "Get movie's info with id = " + str(id) + " successfully."
 
@@ -83,6 +87,9 @@ def movie_rating(id, user_id, rated):
 
     rating = Rating.query.filter_by(movie_id=movie.id, user_id=user_id).first()
 
+    logger = Logger(user_id=user_id, action_type_id=5, movie_id=id, rating=rated)
+    logger.create_log()
+
     if rating is None:
         r = Rating(rating=rated, user_id=user_id, movie_id=movie.id)
         db.session.add(r)
@@ -125,6 +132,10 @@ def remove_rating(id, user_id):
 
     if rating is not None:
         db.session.delete(rating)
+
+        logger = Logger(user_id=user_id, action_type_id=6, movie_id=id)
+        logger.create_log()
+
         db.session.commit()
 
     return create_response(200, "Delete movie's rating successfully")
@@ -157,6 +168,9 @@ def user_review(user_id, id, headline, body, rated):
         rating.rating = rated
         rating.timestamp = datetime.datetime.utcnow()
         db.session.add(rating)
+
+    logger = Logger(user_id=user_id, action_type_id=7, movie_id=id, headline=headline, body=body)
+    logger.create_log()
 
     db.session.commit()
     return create_response(200, "Update review for movie successfully")

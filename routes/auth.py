@@ -6,6 +6,7 @@ from app.response import Response, create_response
 import re
 import json
 import datetime
+from routes.logger import Logger
 
 
 class Token:
@@ -36,6 +37,9 @@ def auth_register():
             db.session.commit()
 
             data = create_token(u)
+
+            logger = Logger(user_id=u.id, action_type_id=1)
+            logger.create_log()
 
             return create_response(201, "Create account successfully", data=data)
         else:
@@ -75,6 +79,9 @@ def auth_login():
     else:
         if user.check_password(password):
             data = create_token(user)
+
+            logger = Logger(user_id=user.id, action_type_id=2)
+            logger.create_log()
 
             return create_response(200, "Login successfully", data=data)
         else:

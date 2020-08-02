@@ -1,5 +1,5 @@
 from app import app, db
-from app.models import User, Movie, Rating, Cast, Crew, Keyword, MovieKeywords, CreditCrews, CreditCasts, Genre, MovieGenres, Video
+from app.models import User, Movie, Rating, Cast, Crew, Keyword, MovieKeywords, CreditCrews, CreditCasts, Genre, MovieGenres, Video, ActionType, ActionParameter
 from app.search import add_to_index
 from flask_script import Manager
 import random
@@ -9,6 +9,7 @@ import sqlite3 as sql
 import datetime
 import requests
 from ast import literal_eval
+import json
 
 manager = Manager(app)
 
@@ -41,12 +42,11 @@ def seed():
             db.session.add(r)
 
     movies = Movie.query.all()
-    # if len(movies) == 0:
-    mv = pd.read_csv("dataset/movies.csv")
-    links = pd.read_csv("dataset/links.csv")
+    if len(movies) == 0:
+        mv = pd.read_csv("dataset/movies.csv")
+        links = pd.read_csv("dataset/links.csv")
 
-    for index, row in mv.iterrows():
-        if row['movieId'] > 2389:
+        for index, row in mv.iterrows():
             tmdb_id = links.loc[index, 'tmdbId']
             id = row['movieId']
 
@@ -194,6 +194,28 @@ def seed():
 
             db.session.commit()
 
+    actions = ActionType.query.all()
+    if len(actions) == 0:
+        with open('seed/ActionType.json') as json_file:
+            data = json.load(json_file)
+
+            for action in data:
+                action_type = ActionType(
+                    id=action['id'], name=action['name'], description=action['description'])
+                db.session.add(action_type)
+
+        db.session.commit()
+
+    parameters = ActionParameter.query.all()
+    if len(parameters) == 0:
+        with open('seed/ActionParameter.json') as json_file:
+            data = json.load(json_file)
+
+            for action in data:
+                action_parameter = ActionParameter(id=action['id'], name=action['name'])
+                db.session.add(action_parameter)
+
+        db.session.commit()
 
 @manager.command
 def data():
