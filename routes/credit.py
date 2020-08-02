@@ -1,4 +1,4 @@
-from app.models import CreditCasts, CreditCrews, Cast, Crew, Video, Review, Rating, User
+from app.models import CreditCasts, CreditCrews, Cast, Crew, Video, Review, Rating, User, Keyword, MovieKeywords
 from app import app
 
 def get_credits(id):
@@ -37,6 +37,16 @@ def get_credits(id):
         })
 
     return casts, director, writing_list
+
+
+def get_keywords(id):
+    keywords = Keyword.query\
+        .join(MovieKeywords, MovieKeywords.keyword_id == Keyword.id)\
+        .filter(MovieKeywords.movie_id == id)\
+        .limit(4).all()
+
+    keyword_list = [{ 'id': k.id, 'name': k.name } for k in keywords]
+    return keyword_list
 
 
 def get_videos(id):

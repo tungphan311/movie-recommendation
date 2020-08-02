@@ -3,7 +3,7 @@ from app.response import create_response
 from app import db, app
 from routes.validate import valid_user, valid_movie
 from routes.recommendation import formatMovieLength
-from routes.credit import get_credits, get_videos, get_first_review
+from routes.credit import get_credits, get_videos, get_first_review, get_keywords
 from routes.ContentBase import get_recommendations
 from routes.DemongraphicFiltering import get_most_popular
 from routes.logger import Logger
@@ -25,6 +25,55 @@ def movie_get_by_id(id, user_id):
     mes = "Get movie's info with id = " + str(id) + " successfully."
 
     return create_response(200, mes, data=res)
+
+
+def movie_get_review(id, user_id, page):
+    movie = Movie.query.get(id)
+    user = User.query.get(user_id)
+
+    if movie is None or user is None:
+        return create_response(400, 'Invalid request!')
+
+    reviews = Review.query.order_by(
+        Review.timestamp.desc()).paginate(page, app.config['PAGE_SIZE'], error_out=False)
+    count = Review.query.filter_by(movie_id=id).count()
+    user_rate = Rating.query.filter_by(user_id=user_id, movie_id=id).first()
+    user_rating = user_rate.rating if user_rate is not None else 0
+
+    if len(reviews.items) == 0:
+        return create_response(200, 'Success.', {'total': 0, 'has_more': False, 'list': [], 'avatar': movie.poster_path, 'name': movie.title})
+
+    review_list = []
+
+    for review in reviews.items:
+        rating = Rating.query\
+            .filter(Rating.movie_id == id)\
+            .filter(Rating.user_id == review.user_id)\
+            .first()
+        u = User.query.get(review.user_id)
+
+        review_list.append({
+            'headline': review.headline,
+            'body': review.body,
+            'timestamp': review.timestamp,
+            'rating': rating.rating,
+            'user': u.email
+        })
+
+    has_more = True if count > app.config['PAGE_SIZE'] else False
+
+    response = {
+        'total': count,
+        'has_more': has_more,
+        'list': review_list,
+        'avatar': movie.poster_path,
+        'title': movie.title,
+        'release_date': movie.release_date,
+        'runtime': movie.runtime,
+        'certification': movie.certification,
+        'user_rate': user_rating
+    }
+    return create_response(200, 'Success.', response)
 
 
 def get_movie(id, user_id):
@@ -53,6 +102,7 @@ def get_movie(id, user_id):
     casts, director, writings = get_credits(movie.id)
     videos = get_videos(movie.id)
     review = get_first_review(movie.id)
+    keywords = get_keywords(movie.id)
 
     res = {
         "rating": round(movie.rating, 1),
@@ -74,6 +124,7 @@ def get_movie(id, user_id):
         "writers": writings,
         "videos": videos,
         "review": review,
+        "keywords": keywords
     }
 
     return res
