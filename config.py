@@ -15,7 +15,7 @@ class Config(object):
     ELASTICSEARCH_URL = os.environ.get('ELASTICSEARCH_URL')
     API_KEY = os.environ.get('API_KEY')
 
-    PAGE_SIZE = 20
+    PAGE_SIZE = 24
 
     JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY')
     CORS_HEADERS = 'Content-Type'
@@ -23,3 +23,4 @@ class Config(object):
     IMG_URL = "http://images.tmdb.org/t/p/original"
     IMG_DEFAULT = "https://www.reelviews.net/resources/img/default_poster.jpg"
     BACKDROP_DEFAULT = "https://www.salonlfc.com/wp-content/uploads/2018/01/image-not-found-scaled-1150x647.png"
+    VIDEO_URL = "https://www.youtube.com/embed/"

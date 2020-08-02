@@ -1,4 +1,5 @@
 from app.models import CreditCasts, CreditCrews, Cast, Crew, Video, Review, Rating, User
+from app import app
 
 def get_credits(id):
     creditCasts = CreditCasts.query.filter_by(movie_id=id).limit(5).all()
@@ -40,12 +41,11 @@ def get_credits(id):
 
 def get_videos(id):
     videos = Video.query.filter_by(movie_id=id).all()
-    video_url = "https://www.youtube.com/embed/"
 
     if videos is None:
         return []
     
-    movie_videos = [{ 'id': v.id, 'name': v.name, 'key': video_url + v.key } for v in videos]
+    movie_videos = [{ 'id': v.id, 'name': v.name, 'key': app.config['VIDEO_URL'] + v.key } for v in videos]
 
     return movie_videos
 

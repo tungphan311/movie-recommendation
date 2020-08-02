@@ -1,8 +1,8 @@
 from app import app
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import jwt_required
 from app.api.helpers import get_authorization
 from flask import request
-from routes.movie import movie_get_by_id, movie_rating, remove_rating, user_review, get_user_review
+from routes.movie import movie_get_by_id, movie_rating, remove_rating, user_review, get_user_review, movie_get_similar, get_popular_movies, get_top_rated_movies
 from routes.user import add_movie_to_favorite
 
 
@@ -12,6 +12,11 @@ def get_movie_by_id(id=0):
     user_id, _ = get_authorization()
 
     return movie_get_by_id(id, user_id)
+
+
+@app.route("/api/movies/<int:id>/similar")
+def get_similar_movie(id=0):
+    return movie_get_similar(id)
 
 
 @app.route("/api/movies/<int:id>/rate", methods=['POST'])
@@ -63,3 +68,19 @@ def add_to_favorites(id=0):
     user_id, _ = get_authorization()
 
     return add_movie_to_favorite(user_id, id)
+
+
+@app.route("/api/movies/popular")
+@jwt_required
+def get_popular():
+    user_id, _ = get_authorization()
+
+    return get_popular_movies(user_id)
+
+
+@app.route("/api/movies/top-rated")
+@jwt_required
+def get_top_rated():
+    user_id, _ = get_authorization()
+
+    return get_top_rated_movies(user_id)

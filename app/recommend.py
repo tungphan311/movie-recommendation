@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime, timedelta
 import pandas as pd
 import sqlite3 as sql
 from app.models import Recommend, User, Rating
@@ -24,7 +24,7 @@ def run_recommend_alg():
 
     rate_train[:, :2] -= 1
 
-    rs = CF(rate_train, k=30)
+    rs = CF(rate_train, k=20)
     rs.fit()
 
     for id in range(nums_user):
@@ -34,14 +34,14 @@ def run_recommend_alg():
         if rating is None:
             continue
 
-        date = rating.timestamp
+        date = rating.timestamp + timedelta(days=1)
         day = date.day
         month = date.month
         year = date.year
 
-        today = datetime.datetime.now()
+        today = datetime.now()
 
-        if day + 1 == today.day and month == today.month and year == today.year:
+        if day == today.day and month == today.month and year == today.year:
             print('found')
             recommends = Recommend.query.filter_by(user_id=id+1).all()
             for i in range(len(recommends)):
@@ -58,11 +58,10 @@ def run_recommend_alg():
         else:
             continue
 
-    db.session.commit()
+        db.session.commit()
 
 
 def recommend():
-    hour = datetime.datetime.now().hour
     print('start')
 
     run_recommend_alg()
@@ -70,7 +69,7 @@ def recommend():
 
 
 schedule = BackgroundScheduler()
-schedule.add_job(func=recommend, trigger="cron", hour="2", minute="5")
+schedule.add_job(func=recommend, trigger="cron", hour="1", minute="00")
 schedule.start()
 
 atexit.register(lambda: schedule.shutdown())
