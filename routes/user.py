@@ -46,8 +46,8 @@ def get_favorite_movies(user_id):
 
     response = []
 
-    for movie in favorites.items:
-        res = get_movie(movie.id, user_id)
+    for favorite in favorites.items:
+        res = get_movie(favorite.movie_id, user_id)
         response.append(res)
 
     has_more = True if count > page_size * page else False

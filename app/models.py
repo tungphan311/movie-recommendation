@@ -126,8 +126,10 @@ class Genre(db.Model):
     def __repr__(self):
         return '<Genre {}>'.format(self.name)
 
-class Keyword(db.Model):
+
+class Keyword(SearchableMixin, db.Model):
     __tablename__ = 'keyword'
+    __searchable__ = ['name']
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
 
