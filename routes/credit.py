@@ -23,7 +23,7 @@ def get_credits(id):
     director = {
         'id': crew.id,
         'name': crew.name
-    }
+    } if crew is not None else None
 
     casts = []
 

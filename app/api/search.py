@@ -3,7 +3,7 @@ from flask import request
 from routes.search import search_movie
 from flask_jwt_extended import jwt_required
 from app.api.helpers import get_authorization
-from routes.actor import actor_get_movies
+from routes.actor import actor_get_movies, get_all_genres, genre_get_movies
 
 @app.route("/api/movies")
 @jwt_required
@@ -28,3 +28,18 @@ def actor_id(id=0):
     page = data.get("page", 1, type=int)
 
     return actor_get_movies(id, page, user_id)
+
+@app.route("/api/genres/<int:id>")
+@jwt_required
+def genre_id(id=0):
+    user_id, _ = get_authorization()
+
+    data = request.args
+    page = data.get("page", 1, type=int)
+
+    return genre_get_movies(id, page, user_id)
+
+
+@app.route("/api/genres")
+def get_genres():
+    return get_all_genres()
