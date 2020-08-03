@@ -60,7 +60,7 @@ def movie_get_review(id, user_id, page):
             'user': u.email
         })
 
-    has_more = True if count > app.config['PAGE_SIZE'] else False
+    has_more = True if count > app.config['PAGE_SIZE'] * page else False
 
     response = {
         'total': count,
@@ -129,6 +129,7 @@ def get_movie(id, user_id):
 
     return res
 
+
 def movie_rating(id, user_id, rated):
     # query from request info
     movie = Movie.query.get(id)
@@ -138,7 +139,8 @@ def movie_rating(id, user_id, rated):
 
     rating = Rating.query.filter_by(movie_id=movie.id, user_id=user_id).first()
 
-    logger = Logger(user_id=user_id, action_type_id=5, movie_id=id, rating=rated)
+    logger = Logger(user_id=user_id, action_type_id=5,
+                    movie_id=id, rating=rated)
     logger.create_log()
 
     if rating is None:
@@ -178,7 +180,7 @@ def remove_rating(id, user_id):
 
     if movie is None:
         return create_response(400, "Movie is not exist")
-        
+
     rating = Rating.query.filter_by(movie_id=movie.id, user_id=user_id).first()
 
     if rating is not None:
@@ -220,7 +222,8 @@ def user_review(user_id, id, headline, body, rated):
         rating.timestamp = datetime.datetime.utcnow()
         db.session.add(rating)
 
-    logger = Logger(user_id=user_id, action_type_id=7, movie_id=id, headline=headline, body=body)
+    logger = Logger(user_id=user_id, action_type_id=7,
+                    movie_id=id, headline=headline, body=body)
     logger.create_log()
 
     db.session.commit()
@@ -258,7 +261,7 @@ def movie_get_similar(id):
 
     if movie is None:
         return create_response(400, 'Movie is not exist')
-    
+
     movies = get_recommendations(movie.title)
 
     similars = []
@@ -268,13 +271,13 @@ def movie_get_similar(id):
 
         mov = Movie.query.get(movie_id)
         genres = Genre.query\
-                .join(MovieGenres, MovieGenres.genre_id == Genre.id)\
-                .filter(MovieGenres.movie_id == movie_id)\
-                .limit(3).all()
+            .join(MovieGenres, MovieGenres.genre_id == Genre.id)\
+            .filter(MovieGenres.movie_id == movie_id)\
+            .limit(3).all()
 
-        mov_genres = [ gen.name for gen in genres ]
-            
-        similars.append({ 
+        mov_genres = [gen.name for gen in genres]
+
+        similars.append({
             'id': movie_id,
             'title': mov.title,
             'img': mov.poster_path,

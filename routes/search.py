@@ -11,7 +11,7 @@ from unidecode import unidecode
 def search_movie(key, page, searchType, short, user_id):
     newKey = unidecode(key)
 
-    response = { 'query': key }
+    response = {'query': key}
 
     if searchType == 'All' or searchType == 'Titles':
         movies = query_movie(newKey, page, short, user_id)
@@ -31,13 +31,12 @@ def query_movie(key, page, short, user_id):
     search1 = "{}%".format(key)
     search2 = "%{}%".format(key)
 
-
     if short == 1:
         result = []
         movies = Movie.query.filter(Movie.title.like(search1))\
-                .order_by(Movie.rating.desc())\
-                .limit(3)\
-                .all()
+            .order_by(Movie.rating.desc())\
+            .limit(3)\
+            .all()
 
         for movie in movies:
             res = get_movie_short(movie.id)
@@ -65,14 +64,14 @@ def query_movie(key, page, short, user_id):
             .count()
 
         response = []
-        
+
         for q in query.items:
             res = get_movie(q.id, user_id)
             response.append(res)
 
-        has_more = True if total > page_size else False
+        has_more = True if total > page_size * page else False
 
-        return { 'has_more': has_more, 'list': response }
+        return {'has_more': has_more, 'list': response, 'total': total}
 
 
 def query_cast(key, page, short):
@@ -86,9 +85,9 @@ def query_cast(key, page, short):
             .limit(3)\
             .all()
 
-        cast_list = [{ 'id': cast.id, 'name': cast.name, 'avatar': cast.image } for cast in casts]
+        cast_list = [{'id': cast.id, 'name': cast.name,
+                      'avatar': cast.image} for cast in casts]
         return cast_list
-
 
 
 def get_movie_short(id):
@@ -110,10 +109,10 @@ def get_movie_short(id):
         'genres': genre_list
     }
 
+
 def search_keyword(key, page):
     print('as')
     page_size = app.config['PAGE_SIZE']
     ids, total = query_index('keyword', key, page, app.config['PAGE_SIZE'])
 
     print(ids)
-
